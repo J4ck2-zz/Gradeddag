@@ -9,8 +9,6 @@ import (
 	"strconv"
 )
 
-
-
 type Block struct {
 	Author    core.NodeID
 	Round     int
@@ -102,6 +100,10 @@ func (msg *GRBCProposeMsg) MsgType() int {
 	return GRBCProposeType
 }
 
+func (msg *GRBCProposeMsg) Module() string {
+	return "consensus"
+}
+
 // EchoMsg
 type EchoMsg struct {
 	Author    core.NodeID
@@ -147,6 +149,10 @@ func (msg *EchoMsg) Hash() crypto.Digest {
 
 func (msg *EchoMsg) MsgType() int {
 	return EchoType
+}
+
+func (msg *EchoMsg) Module() string {
+	return "consensus"
 }
 
 // ReadyMsg
@@ -196,6 +202,10 @@ func (msg *ReadyMsg) MsgType() int {
 	return ReadyType
 }
 
+func (msg *ReadyMsg) Module() string {
+	return "consensus"
+}
+
 // CBCProposeMsg
 type CBCProposeMsg struct {
 	Author    core.NodeID
@@ -243,6 +253,10 @@ func (msg *CBCProposeMsg) MsgType() int {
 	return CBCProposeType
 }
 
+func (msg *CBCProposeMsg) Module() string {
+	return "consensus"
+}
+
 type CBCVoteMsg struct {
 	Author    core.NodeID
 	Proposer  core.NodeID
@@ -280,6 +294,10 @@ func (v *CBCVoteMsg) MsgType() int {
 	return CBCVoteType
 }
 
+func (msg *CBCVoteMsg) Module() string {
+	return "consensus"
+}
+
 // ElectMsg
 type ElectMsg struct {
 	Author   core.NodeID
@@ -314,6 +332,9 @@ func (msg *ElectMsg) Hash() crypto.Digest {
 
 func (msg *ElectMsg) MsgType() int {
 	return ElectType
+}
+func (msg *ElectMsg) Module() string {
+	return "consensus"
 }
 
 // RequestBlock
@@ -364,6 +385,10 @@ func (msg *RequestBlockMsg) MsgType() int {
 	return RequestBlockType
 }
 
+func (msg *RequestBlockMsg) Module() string {
+	return "consensus"
+}
+
 // ReplyBlockMsg
 type ReplyBlockMsg struct {
 	Author    core.NodeID
@@ -401,6 +426,10 @@ func (msg *ReplyBlockMsg) MsgType() int {
 	return ReplyBlockType
 }
 
+func (msg *ReplyBlockMsg) Module() string {
+	return "consensus"
+}
+
 type LoopBackMsg struct {
 	BlockHash crypto.Digest
 }
@@ -411,6 +440,10 @@ func (msg *LoopBackMsg) Hash() crypto.Digest {
 
 func (msg *LoopBackMsg) MsgType() int {
 	return LoopBackType
+}
+
+func (msg *LoopBackMsg) Module() string {
+	return "consensus"
 }
 
 const (

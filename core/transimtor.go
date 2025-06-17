@@ -6,7 +6,7 @@ import (
 
 type Message interface {
 	MsgType() int
-	//Module() string // return "mempool" or "consensus" or connect
+	Module() string // return "mempool" or "consensus" or connect
 }
 
 type Transmitor struct {

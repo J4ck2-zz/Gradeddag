@@ -43,6 +43,9 @@ type Core struct {
 	mempoolbackchannel chan crypto.Digest
 	connectChannel     chan core.Message
 	notifyPLoad        chan crypto.Digest
+
+	RpyBlockPendding map[crypto.Digest]struct{}
+	LoopBackPendding map[crypto.Digest]struct{}
 }
 
 func NewCore(
@@ -86,6 +89,9 @@ func NewCore(
 		mempoolbackchannel: mempoolbackchannel,
 		connectChannel:     connectChannel,
 		notifyPLoad:        notifypload,
+
+		RpyBlockPendding: make(map[crypto.Digest]struct{}),
+		LoopBackPendding: make(map[crypto.Digest]struct{}),
 	}
 
 	corer.retriever = NewRetriever(nodeID, store, transmitor, sigService, parameters, loopBackChannel)
@@ -325,13 +331,13 @@ func (corer *Core) handleCBCPropose(propose *CBCProposeMsg) error {
 	}
 
 	// Step 3: check reference
-	if ok, miss := corer.checkReference(propose.B); !ok {
-		//retrieve miss block
-		corer.retriever.requestBlocks(miss, propose.Author, propose.B.Hash())
-		// if (propose.Round-1)%WaveRound != 0 { //如果前一轮是一个PB Round，必须等收到区块后开始投票
-		// 	return ErrReference(propose.MsgType(), propose.Round, int(propose.Author))
-		// }
-	}
+	// if ok, miss := corer.checkReference(propose.B); !ok {
+	// 	//retrieve miss block
+	// 	corer.retriever.requestBlocks(miss, propose.Author, propose.B.Hash())
+	// 	if (propose.Round-1)%WaveRound != 0 { //如果前一轮是一个PB Round，必须等收到区块后开始投票
+	// 		return ErrReference(propose.MsgType(), propose.Round, int(propose.Author))
+	// 	}
+	// }
 
 	//Step 4:check payloads
 	if status := corer.checkPayloads(propose.B); status != mempool.OK {
@@ -483,10 +489,13 @@ func (corer *Core) handleReplyBlock(reply *ReplyBlockMsg) error {
 		//maybe execute more one
 		storeBlock(corer.store, block)
 
-		status := corer.checkPayloads(block)
-		if status != mempool.OK {
-			continue
-		}
+		//status := corer.checkPayloads(block)
+		// if status != mempool.OK {
+		// 	if _, ok := corer.RpyBlockPendding[block.Hash()]; !ok {
+		// 		corer.RpyBlockPendding[block.Hash()] = struct{}{}
+		// 	}
+		// 	continue
+		// }
 
 		corer.handleOutPut(block.Round, block.Author, block.Hash(), block.Reference)
 	}
@@ -500,6 +509,7 @@ func (corer *Core) handleLoopBack(block *Block) error {
 	logger.Debug.Printf("procesing block loop back round %d node %d \n", block.Round, block.Author)
 	status := corer.checkPayloads(block)
 	if status != mempool.OK {
+		corer.LoopBackPendding[block.Hash()] = struct{}{}
 		return ErrLossPayloads(block.Round, int(block.Author))
 	}
 	//GRBC round
@@ -520,6 +530,14 @@ func (corer *Core) handleMLoopBack(digest crypto.Digest) error {
 	//re output
 	block, _ := getBlock(corer.store, digest)
 	if ok, _ := corer.checkReference(block); ok {
+		if _, ok := corer.RpyBlockPendding[digest]; ok {
+			delete(corer.RpyBlockPendding, digest)
+			corer.handleOutPut(block.Round, block.Author, block.Hash(), block.Reference)
+		}
+		if _, ok := corer.LoopBackPendding[digest]; ok {
+			delete(corer.LoopBackPendding, digest)
+			corer.handleLoopBack(block)
+		}
 
 	}
 
@@ -548,6 +566,9 @@ func (corer *Core) handleCBCCallBack(req *cbcCallBackReq) error {
 }
 
 func (corer *Core) Run() {
+
+	go corer.Mempool.Run()
+
 	if corer.nodeID >= core.NodeID(corer.parameters.Faults) {
 		//first propose
 		block := corer.generatorBlock(0)
@@ -596,6 +617,10 @@ func (corer *Core) Run() {
 			case cbReq := <-corer.cbcCallBackChannel:
 				{
 					err = corer.handleCBCCallBack(cbReq)
+				}
+			case mblock := <-corer.mempoolbackchannel:
+				{
+					err = corer.handleMLoopBack(mblock)
 				}
 			}
 

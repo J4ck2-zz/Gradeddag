@@ -8,6 +8,7 @@ import (
 
 type Messgae interface {
 	MsgType() int
+	Module() string
 }
 
 type Codec struct {

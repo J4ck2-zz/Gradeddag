@@ -1,13 +1,13 @@
 package mempool
 
 import (
+	"fmt"
 	"gradeddag/core"
 	"gradeddag/crypto"
 	"gradeddag/logger"
 	"gradeddag/network"
 	"gradeddag/pool"
 	"gradeddag/store"
-	"fmt"
 
 	//"log"
 	"net"

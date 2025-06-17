@@ -2,7 +2,7 @@ package mempool
 
 import (
 	"gradeddag/core"
-	//"gradeddag/logger"
+	"gradeddag/logger"
 	"gradeddag/network"
 )
 
@@ -39,13 +39,12 @@ func NewTransmit(
 
 	go func() {
 		for msg := range tr.receiver.RecvChannel() {
-			tr.mempoolCh <- msg
-			// switch msg.Module() {
-			// case "mempool":
-			// 	tr.mempoolCh <- msg
-			// default:
-			// 	logger.Warn.Printf("Unknown module %s", msg.Module())
-			// }
+			switch msg.Module() {
+			case "mempool":
+				tr.mempoolCh <- msg
+			default:
+				logger.Warn.Printf("Unknown module %s", msg.Module())
+			}
 		}
 	}()
 

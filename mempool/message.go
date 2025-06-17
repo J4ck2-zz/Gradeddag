@@ -1,11 +1,11 @@
 package mempool
 
 import (
+	"bytes"
+	"encoding/gob"
 	"gradeddag/core"
 	"gradeddag/crypto"
 	"gradeddag/pool"
-	"bytes"
-	"encoding/gob"
 	"reflect"
 	"strconv"
 )
@@ -195,7 +195,7 @@ func (msg *LoopBackMempoolMsg) Module() string {
 }
 
 const (
-	OwnPayloadType int = iota + 17
+	OwnPayloadType int = iota + 10
 	OtherPayloadType
 	RequestPayloadType
 	MakeBlockType
