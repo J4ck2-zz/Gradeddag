@@ -529,15 +529,10 @@ func (corer *Core) handleMLoopBack(digest crypto.Digest) error {
 
 	//re output
 	block, _ := getBlock(corer.store, digest)
+	logger.Warn.Printf("mloopback round-%d-node-%d  \n", block.Round, block.Author)
 	if ok, _ := corer.checkReference(block); ok {
-		if _, ok := corer.RpyBlockPendding[digest]; ok {
-			delete(corer.RpyBlockPendding, digest)
-			corer.handleOutPut(block.Round, block.Author, block.Hash(), block.Reference)
-		}
-		if _, ok := corer.LoopBackPendding[digest]; ok {
-			delete(corer.LoopBackPendding, digest)
-			corer.handleLoopBack(block)
-		}
+
+		corer.handleLoopBack(block)
 
 	}
 

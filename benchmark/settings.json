@@ -1,14 +1,20 @@
 {
-  "key": {
-    "name": "gradeddag",
-    "path": "/root/.ssh/id_rsa",
-    "accesskey": "/root/.aliyun/access.json"
-  },
-  "ports": {
-    "consensus": 8000
-  },
-  "instances": {
-    "type": "ecs.g6e.xlarge",
-    "regions": ["eu-central-1", "ap-northeast-2", "ap-southeast-1", "us-east-1"]
-  }
+    "key": {
+        "name": "zhangjian",
+        "path": "/root/.ssh/Aliyun",
+        "accesskey": "/root/.aliyun/access.json"
+    },
+    "ports": {
+        "consensus": 8000,
+        "mempool":7000
+    },
+    "instances": {
+        "type": "ecs.g6e.xlarge",
+        "regions": [
+            "ap-southeast-1",
+            "eu-central-1",
+            "eu-west-1",
+            "us-west-1"
+        ]
+    }
 }
